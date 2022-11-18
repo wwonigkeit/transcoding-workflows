@@ -1,0 +1,19 @@
+description: A simple 'no-op' state that returns 'Hello world!'
+
+functions:
+- id: videotranscoding
+  image: wwonigkeit/videotranscoding:latest
+  type: knative-workflow
+  size: large
+
+states:
+- id: videotranscoding
+  type: action
+  action:
+    function: videotranscoding
+    input:
+      commands:
+      - command: ffmpeg -i https://direktiv-videos.s3.us-west-1.amazonaws.com/input.avi output.mp4
+      - command: cp output.mp4 out/instance/output.mp4
+      - command: ffprobe -v quiet -print_format json -show_format -show_streams output.mp4
+
