@@ -10,8 +10,8 @@ functions:
     type: knative-workflow
     size: small
   - id: subflow-transcode
-    type: knative-subflow
-    subflow: subflow-transcode
+    type: subflow
+    workflow: subflow-transcode
 
 states:
   - id: validate
