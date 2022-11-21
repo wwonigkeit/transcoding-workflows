@@ -24,7 +24,6 @@ states:
         - command: aws s3 cp --endpoint jq(.url) s3://jq(.bucket)/jq(.Key) out/workflow/jq(.Key | match(".*/(.*$)").captures[0].string)
     # transform: 'jq({ movies: (.bucket as $bucket | .region as $region | .url as $url | [.return."aws-cli"[].result.Contents[] | . + {bucket: $bucket, url: $url,  bucket: $bucket,  region: $region}])})'
 
-
   - id: videotranscoding
     type: action
     action:
