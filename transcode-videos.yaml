@@ -1,23 +1,56 @@
 description: A simple 'no-op' state that returns 'Hello world!'
 
 functions:
-- id: videotranscoding
-  image: wwonigkeit/videotranscoding:latest
-  type: knative-workflow
-  size: large
+  - id: videotranscoding
+    image: wwonigkeit/videotranscoding:latest
+    type: knative-workflow
+    size: large
+  - id: aws-cli
+    image: gcr.io/direktiv/functions/aws-cli:1.0
+    type: knative-workflow
+    size: small
 
 states:
-- id: videotranscoding
-  type: action
-  action:
-    function: videotranscoding
-    input:
-      commands:
-      - command: ffmpeg -i https://direktiv-videos.s3.us-west-1.amazonaws.com/input.avi output.mp4
-      - command: cp output.mp4 out/instance/output.mp4
-      - command: ffprobe -v quiet -print_format json -show_format -show_streams output.mp4
-  transform: logall
+  - id: validate
+    type: validate
+    schema:
+      title: "Inputs to the video transcoding workflow"
+      type: object
+      required: ["url","bucket"]
+      properties:
+        url:
+          title: "S3 Bucket URL"
+          type: string
+          default: "https://direktiv-demo.us-east-1.linodeobjects.com/"
+        bucket:
+          title: "S3 Bucket Name"
+          type: string
+          default: "bbb"
+    transition: list-videos
 
-- id: logall
-  type: noop
-  log: jq(.)
+  - id: list-videos
+    type: action
+    action:
+      function: aws-cli
+      secrets: ["LINNODE_S3_SECRET_KEY", "LINODE_S3_ACCESS_KEY"]
+      input:
+        access-key: jq(.secrets.LINODE_S3_ACCESS_KEY)
+        secret-key: jq(.secrets.LINNODE_S3_SECRET_KEY)
+        region: "us"
+        commands:
+        - command: aws s3 ls --endpoint=jq(.url)
+
+  - id: videotranscoding
+    type: action
+    action:
+      function: videotranscoding
+      input:
+        commands:
+        - command: ffmpeg -i https://direktiv-videos.s3.us-west-1.amazonaws.com/input.avi output.mp4
+        - command: cp output.mp4 out/instance/output.mp4
+        - command: ffprobe -v quiet -print_format json -show_format -show_streams output.mp4
+    transform: logall
+
+  - id: logall
+    type: noop
+    log: jq(.)
