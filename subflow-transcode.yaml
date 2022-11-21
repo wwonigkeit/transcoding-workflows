@@ -11,11 +11,7 @@ functions:
     size: small
 
 states:
-  - id: logall
-    type: noop
-    log: jq(.)
-
-  - id: list-videos
+  - id: get-video
     type: action
     action:
       function: aws-cli
@@ -25,8 +21,8 @@ states:
         secret-key: jq(.secrets.LINNODE_S3_SECRET_KEY)
         region: jq(.region)
         commands:
-        - command: aws --output json s3api list-objects --bucket jq(.bucket) --endpoint jq(.url)
-    transform: 'jq({ movies: (.bucket as $bucket | .region as $region | .url as $url | [.return."aws-cli"[].result.Contents[] | . + {bucket: $bucket, url: $url,  bucket: $bucket,  region: $region}])})'
+        - command: aws s3 cp --endpoint jq(.url) s3://jq(.bucket)/jq(.Key) out/workflow/jq(.Key)
+    #transform: 'jq({ movies: (.bucket as $bucket | .region as $region | .url as $url | [.return."aws-cli"[].result.Contents[] | . + {bucket: $bucket, url: $url,  bucket: $bucket,  region: $region}])})'
 
 
   - id: videotranscoding
