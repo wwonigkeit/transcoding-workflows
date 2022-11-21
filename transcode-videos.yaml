@@ -21,11 +21,15 @@ states:
         url:
           title: "S3 Bucket URL"
           type: string
-          default: "https://direktiv-demo.us-east-1.linodeobjects.com/"
+          default: "https://us-east-1.linodeobjects.com"
         bucket:
           title: "S3 Bucket Name"
           type: string
-          default: "bbb"
+          default: "direktiv-demo"
+        region:
+          title: "S3 Linode Region"
+          type: string
+          default: "us-east-1"
     transition: list-videos
 
   - id: list-videos
@@ -36,9 +40,10 @@ states:
       input:
         access-key: jq(.secrets.LINODE_S3_ACCESS_KEY)
         secret-key: jq(.secrets.LINNODE_S3_SECRET_KEY)
-        region: "us"
+        region: jq(.region)
         commands:
-        - command: aws s3 ls --endpoint=jq(.url)
+        # - command: aws s3 ls s3://direktiv-demo --endpoint=jq(.url) --output=json --recursive
+        - command: aws --output json s3api list-objects --bucket jq(.bucket) --endpoint jq(.url)
 
   - id: videotranscoding
     type: action
