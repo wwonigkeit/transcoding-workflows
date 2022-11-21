@@ -8,7 +8,7 @@ functions:
   - id: aws-cli
     image: gcr.io/direktiv/functions/aws-cli:1.0
     type: knative-workflow
-    size: small
+    size: large
 
 states:
   - id: get-video
@@ -21,7 +21,7 @@ states:
         secret-key: jq(.secrets.LINNODE_S3_SECRET_KEY)
         region: jq(.region)
         commands:
-        - command: aws s3 cp --endpoint jq(.url) s3://jq(.bucket)/jq(.Key) out/workflow/jq(.Key)
+        - command: aws s3 cp --endpoint jq(.url) s3://jq(.bucket)/jq(.Key) out/workflow/jq(.Key | match(".*/(.*$)").captures[0].string)
     # transform: 'jq({ movies: (.bucket as $bucket | .region as $region | .url as $url | [.return."aws-cli"[].result.Contents[] | . + {bucket: $bucket, url: $url,  bucket: $bucket,  region: $region}])})'
 
 
