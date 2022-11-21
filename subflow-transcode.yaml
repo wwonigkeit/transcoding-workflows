@@ -22,7 +22,7 @@ states:
         region: jq(.region)
         commands:
         - command: aws s3 cp --endpoint jq(.url) s3://jq(.bucket)/jq(.Key) out/workflow/jq(.Key)
-    #transform: 'jq({ movies: (.bucket as $bucket | .region as $region | .url as $url | [.return."aws-cli"[].result.Contents[] | . + {bucket: $bucket, url: $url,  bucket: $bucket,  region: $region}])})'
+    # transform: 'jq({ movies: (.bucket as $bucket | .region as $region | .url as $url | [.return."aws-cli"[].result.Contents[] | . + {bucket: $bucket, url: $url,  bucket: $bucket,  region: $region}])})'
 
 
   - id: videotranscoding
@@ -34,6 +34,6 @@ states:
         - command: ffmpeg -i https://direktiv-videos.s3.us-west-1.amazonaws.com/input.avi output.mp4
         - command: cp output.mp4 out/instance/output.mp4
         - command: ffprobe -v quiet -print_format json -show_format -show_streams output.mp4
-    transition: logall
+    # transition: logall
 
 
