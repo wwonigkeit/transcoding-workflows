@@ -9,31 +9,11 @@ functions:
     image: gcr.io/direktiv/functions/aws-cli:1.0
     type: knative-workflow
     size: small
-  - id: subflow-transcode
-    type: knative-subflow
-    subflow: subflow-transcode
 
 states:
-  - id: validate
-    type: validate
-    schema:
-      title: "Inputs to the video transcoding workflow"
-      type: object
-      required: ["url","bucket"]
-      properties:
-        url:
-          title: "S3 Bucket URL"
-          type: string
-          default: "https://us-east-1.linodeobjects.com"
-        bucket:
-          title: "S3 Bucket Name"
-          type: string
-          default: "direktiv-demo"
-        region:
-          title: "S3 Linode Region"
-          type: string
-          default: "us-east-1"
-    transition: list-videos
+  - id: logall
+    type: noop
+    log: jq(.)
 
   - id: list-videos
     type: action
@@ -47,14 +27,6 @@ states:
         commands:
         - command: aws --output json s3api list-objects --bucket jq(.bucket) --endpoint jq(.url)
     transform: 'jq({ movies: (.bucket as $bucket | .region as $region | .url as $url | [.return."aws-cli"[].result.Contents[] | . + {bucket: $bucket, url: $url,  bucket: $bucket,  region: $region}])})'
-    transition: run-transcoding
-
-  - id: run-transcoding
-    type: foreach
-    array: 'jq(.movies)'
-    action:
-      function: subflow-transcode
-      input: jq(.)
 
 
   - id: videotranscoding
@@ -66,8 +38,6 @@ states:
         - command: ffmpeg -i https://direktiv-videos.s3.us-west-1.amazonaws.com/input.avi output.mp4
         - command: cp output.mp4 out/instance/output.mp4
         - command: ffprobe -v quiet -print_format json -show_format -show_streams output.mp4
-    transform: logall
+    transition: logall
 
-  - id: logall
-    type: noop
-    log: jq(.)
+
