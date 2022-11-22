@@ -21,7 +21,7 @@ states:
         secret-key: jq(.secrets.LINNODE_S3_SECRET_KEY)
         region: jq("us")
         commands:
-        - command: /usr/local/bin/aws s3 cp --endpoint https://us-east-1.linodeobjects.com s3://direktiv-demo/bbb/bbb_sunflower_native_60fps_normal.mp4
+        - command: /usr/local/bin/aws s3 cp --endpoint https://us-east-1.linodeobjects.com s3://direktiv-demo/bbb/bbb_sunflower_native_60fps_normal.mp4 out/workflow/bbb_sunflower_native_60fps_normal.mp4
     # transform: 'jq({ movies: (.bucket as $bucket | .region as $region | .url as $url | [.return."aws-cli"[].result.Contents[] | . + {bucket: $bucket, url: $url,  bucket: $bucket,  region: $region}])})'
 
   - id: videotranscoding
